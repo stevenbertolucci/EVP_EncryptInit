@@ -28,7 +28,8 @@
 int decrypted_len;
 int buffer_len;
 
-// See citation section. I modified the parameters because the sample code uses File I/O. I wanted to use local variables.
+// See citation section. I modified the some of the code because the sample code uses File I/O. I wanted to use local 
+// variables that contains the value of the ciphertext and plaintext.
 // Citation fro the following functions:
 // Date: 10/13/2024
 // Copied and adapted from:
@@ -129,7 +130,7 @@ void find_key(char *wordlist, char *ciphertext, char *plaintext, int ciphertext_
         }
 
         // printf("Key: %s", key);
-        
+
         // Copy the word over to the key for decryption
         for (int i = 0; i < strlen(word); i++) {
             key[i] = word[i];
