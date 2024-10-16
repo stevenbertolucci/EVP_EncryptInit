@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Global variables
 int decrypted_len;
 // int buffer_len;
 
