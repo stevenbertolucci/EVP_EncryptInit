@@ -35,9 +35,9 @@ int decrypted_len;
 // Date: 10/13/2024
 // Copied and adapted from:
 // Source URL: https://docs.openssl.org/3.1/man3/EVP_EncryptInit/#examples
-int do_crypt(char *inbuf, size_t inlen, char *out, int do_encrypt, const char *key, const char *iv) {
+int do_crypt(char *inbuf, size_t inlen, char *outbuf, int do_encrypt, const char *key, const char *iv) {
 
-    unsigned char outbuf[1024 + EVP_MAX_BLOCK_LENGTH];
+    // unsigned char outbuf[1024 + EVP_MAX_BLOCK_LENGTH];
     int outlen, finalLen;
     int buffer_len = 0;
     EVP_CIPHER_CTX *ctx;
@@ -53,21 +53,25 @@ int do_crypt(char *inbuf, size_t inlen, char *out, int do_encrypt, const char *k
     OPENSSL_assert(EVP_CIPHER_CTX_key_length(ctx) == 16);
     OPENSSL_assert(EVP_CIPHER_CTX_iv_length(ctx) == 16);
 
-    if (!EVP_CipherUpdate(ctx, out, &outlen, inbuf, inlen)) {
+    if (!EVP_CipherUpdate(ctx, outbuf, &outlen, inbuf, inlen)) {
         /* ERROR */
         EVP_CIPHER_CTX_free(ctx);
         return 0;
     }
+
+    // printf("Length: %d", outlen);
 
     buffer_len += outlen;
 
-    if (!EVP_CipherFinal_ex(ctx, out + buffer_len, &finalLen)) {
+    if (!EVP_CipherFinal_ex(ctx, outbuf + buffer_len, &finalLen)) {
         /* ERROR */
         EVP_CIPHER_CTX_free(ctx);
         return 0;
     }
 
+    //printf("Length: %d", finalLen);
     buffer_len += finalLen;
+    // printf("Length: %d", buffer_len);
 
     // For null terminator in find_key() function
     decrypted_len = buffer_len;
@@ -126,7 +130,7 @@ void find_key(char *wordlist, char *ciphertext, char *plaintext, int ciphertext_
         // printf("Word: %s", word);
         // printf("\n");
 
-        // Initialize key with spaces
+        // Initialize key with spaces per requirement
         for (int i = 0; i < sizeof(key); i++) {
             key[i] = 0x20;
         }
@@ -147,7 +151,7 @@ void find_key(char *wordlist, char *ciphertext, char *plaintext, int ciphertext_
             // printf("Decrypted text: %s\n", decrypted_text);
 
             // Check if string matches
-            if (strcmp((char *)decrypted_text, plaintext) == 0) {
+            if (strcmp(decrypted_text, plaintext) == 0) {
                 printf("Key found: %s\n", word);
                 break;
             }
