@@ -26,7 +26,7 @@
 #include <string.h>
 
 int decrypted_len;
-int buffer_len;
+// int buffer_len;
 
 // See citation section. I modified the some of the code because the sample code uses File I/O. I wanted to use local 
 // variables that contains the value of the ciphertext and plaintext.
@@ -38,6 +38,7 @@ int do_crypt(char *inbuf, size_t inlen, char *out, int do_encrypt, const char *k
 
     unsigned char outbuf[1024 + EVP_MAX_BLOCK_LENGTH];
     int outlen, finalLen;
+    int buffer_len = 0;
     EVP_CIPHER_CTX *ctx;
 
     ctx = EVP_CIPHER_CTX_new();
@@ -50,8 +51,6 @@ int do_crypt(char *inbuf, size_t inlen, char *out, int do_encrypt, const char *k
 
     OPENSSL_assert(EVP_CIPHER_CTX_key_length(ctx) == 16);
     OPENSSL_assert(EVP_CIPHER_CTX_iv_length(ctx) == 16);
-
-    size_t buffer_len = 0;
 
     if (!EVP_CipherUpdate(ctx, out, &outlen, inbuf, inlen)) {
         /* ERROR */
@@ -68,6 +67,8 @@ int do_crypt(char *inbuf, size_t inlen, char *out, int do_encrypt, const char *k
     }
 
     buffer_len += finalLen;
+
+    // For null terminator in find_key() function
     decrypted_len = buffer_len;
 
     EVP_CIPHER_CTX_free(ctx);
