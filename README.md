@@ -4,5 +4,5 @@
 2) `cd Downloads`
 3) `cd crypto`
 4) Type in: `make`
-5) Run the program by typing in: `./enc`
+5) Run the program by typing in: `./dec`
 6) ALL DONE!
