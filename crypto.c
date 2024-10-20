@@ -26,7 +26,7 @@
 #include <string.h>
 
 // Global variables
-int decrypted_len;
+int decrypted_length;
 // int buffer_len;
 
 // See citation section. I modified the some of the code because the sample code uses File I/O. I wanted to use local 
@@ -60,7 +60,6 @@ int do_crypt(char *inbuf, size_t inlen, char *outbuf, int do_encrypt, const char
     }
 
     // printf("Length: %d", outlen);
-
     buffer_len += outlen;
 
     if (!EVP_CipherFinal_ex(ctx, outbuf + buffer_len, &finalLen)) {
@@ -74,22 +73,18 @@ int do_crypt(char *inbuf, size_t inlen, char *outbuf, int do_encrypt, const char
     // printf("Length: %d", buffer_len);
 
     // For null terminator in find_key() function
-    decrypted_len = buffer_len;
+    decrypted_length = buffer_len;
 
     EVP_CIPHER_CTX_free(ctx);
     return 1;
 }
 
 // Function to try decrypting with each key
-void find_key(char *wordlist, char *ciphertext, char *plaintext, int ciphertext_len) {
+void find_key(char *wordlist, char *ciphertext, char *plaintext, int ciphertext_length) {
 
     // Variables
     FILE *wordList;
-    char word[17];
-    char key[16];
-    // Initialize the byte array with 16 zeros
-    char iv[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    char decrypted_text[17];
+    char word[16], key[16], decrypted_text[16], iv[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     // Terminal texts
     printf("Opening the words list file...\n\n");
@@ -111,14 +106,14 @@ void find_key(char *wordlist, char *ciphertext, char *plaintext, int ciphertext_
         // Get the word length
         int length = strlen(word);
 
-        // printf("Word Length: %d\n", length);
-
         // Key is an English word with less than 16 characters
         // I didn't see any word that is more than 16 characters,
         // but created this check anyway to speed up time
         if (length > 16) {
             continue;
         }
+
+        // printf("Word Length: %d\n", length);
 
         // printf("Word: %s", word);
         //printf("\n");
@@ -143,21 +138,24 @@ void find_key(char *wordlist, char *ciphertext, char *plaintext, int ciphertext_
         }
 
         // Decrypting the ciphertext
-        if (do_crypt(ciphertext, ciphertext_len, decrypted_text, 0, key, iv) == 1) {
+        if (do_crypt(ciphertext, ciphertext_length, decrypted_text, 0, key, iv) == 1) {
 
             // Null terminate the string
-            decrypted_text[decrypted_len] = '\0';
+            decrypted_text[decrypted_length] = '\0';
 
             // printf("Decrypted text: %s\n", decrypted_text);
 
             // Check if string matches
             if (strcmp(decrypted_text, plaintext) == 0) {
+                // printf(decrypted_text);
+                // printf(plaintext);
                 printf("Key found: %s\n", word);
                 break;
             }
         }
     }
 
+    // Close the file pointer
     fclose(wordList);
 }
 
@@ -165,11 +163,11 @@ int main() {
 
     char *plaintext = "This is a top secret.";
     char *ciphertext_hex = "8d20e5056a8d24d0462ce74e4904c1b513e10d1df4a2ef2ad4540fae1ca0aaf9";
-    char ciphertext[32];
+    char ciphertext[32];  // 64 characters = 32 bytes in binary (or characters)
     int ciphertext_length = sizeof(ciphertext);
 
     // Convert hex to binary.
-    // Citation for the following code snippet:
+    // Citation for the following code snippet below:
     // Date: 10/16/2024
     // Copied and adapted from:
     // Source URL: https://stackoverflow.com/questions/3408706/hexadecimal-string-to-byte-array-in-c
